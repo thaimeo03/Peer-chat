@@ -30,6 +30,22 @@ const servers = {
   ]
 }
 
+let constraints = {
+  video: {
+    width: {
+      min: 640,
+      ideal: 1920,
+      max: 1920
+    },
+    height: {
+      min: 480,
+      ideal: 1080,
+      max: 1080
+    }
+  },
+  audio: true
+}
+
 // Hàm khởi tạo
 let init = async () => {
   // Khởi tạo Agora RTM client và đăng nhập
@@ -51,7 +67,7 @@ let init = async () => {
   // Lấy dữ liệu video từ camera và hiển thị nó
   localStream = await navigator.mediaDevices.getUserMedia({
     video: true,
-    audio: false
+    audio: true
   })
 
   document.getElementById('user-1').srcObject = localStream
@@ -104,7 +120,7 @@ let createPeerConnection = async (MemberId) => {
   if (!localStream) {
     localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: false
+      audio: true
     })
     document.getElementById('user-1').srcObject = localStream
   }
@@ -180,8 +196,37 @@ let leaveChannel = async () => {
   await client.logout()
 }
 
+// Bật tắt camera
+let toggleCamera = async () => {
+  let videoTrack = localStream.getTracks().find(track => track.kind === 'video')
+
+
+  if(videoTrack.enabled) {
+    videoTrack.enabled = false
+  } else {
+    videoTrack.enabled = true
+  }
+}
+
+// Bật tắt microphone
+let toggleMic = async () => {
+  let audioTrack = localStream.getTracks().find(track => track.kind === 'audio')
+
+  if(audioTrack.enabled) {
+    audioTrack.enabled = false
+  } else {
+    audioTrack.enabled = true
+  }
+}
+
 // Lắng nghe sự kiện rời kênh
 window.addEventListener('beforeunload', leaveChannel)
+
+// Lắng nghe sự kiện thay đổi camera
+document.getElementById('camera-btn').addEventListener('click', toggleCamera)
+
+// Lắng nghe sự kiện thay đổi microphone
+document.getElementById('mic-btn').addEventListener('click', toggleMic)
 
 // Gọi hàm khởi tạo
 init()
